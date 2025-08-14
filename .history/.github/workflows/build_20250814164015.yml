@@ -42,7 +42,7 @@ jobs:
 
       # 第6步：将打包好的 .zip 文件作为“构建产物”(Artifact) 上传
       - name: Upload macOS Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: macos-game-build # 这是可供下载的文件的名字
           path: Protect-Princess-Alex-macOS.zip # 这是要上传的文件的路径
