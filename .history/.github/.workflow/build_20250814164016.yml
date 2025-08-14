@@ -1,0 +1,48 @@
+# 工作流的名字
+name: Build macOS App
+
+# 触发条件：每当 'main' 分支有新的代码推送时，就自动运行
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # 我们将使用一台运行着最新版 macOS 的云端虚拟机
+    runs-on: macos-latest
+
+    steps:
+      # 第1步：把你的仓库代码下载到这台虚拟Mac上
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 第2步：在这台虚拟Mac上安装并设置好Python环境
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9' # 你可以根据需要修改Python版本
+
+      # 第3步：安装游戏所需的依赖库 (pygame 和 py2app)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install py2app pygame
+
+      # 第4步：运行 py2app 打包命令 (这需要你的项目里有 setup.py 文件!)
+      - name: Build the macOS app
+        run: python3 setup.py py2app
+
+      # 第5步：将打包好的 .app 文件压缩成 .zip 方便下载
+      - name: Create Zip Archive
+        # py2app 会在 'dist' 文件夹里生成 .app 文件。我们进入这个目录，
+        # 然后把里面的 .app 文件打包成一个名为 Protect-Princess-Alex-macOS.zip 的压缩包。
+        run: |
+          cd dist
+          zip -r ../Protect-Princess-Alex-macOS.zip *.app
+
+      # 第6步：将打包好的 .zip 文件作为“构建产物”(Artifact) 上传
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-game-build # 这是可供下载的文件的名字
+          path: Protect-Princess-Alex-macOS.zip # 这是要上传的文件的路径
